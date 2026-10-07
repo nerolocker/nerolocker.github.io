@@ -1,1 +1,539 @@
 // з новiм роком
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Дом со слонами — викторина</title>
+<style>
+:root {
+  --bg: #0d0f10;
+  --panel: #17191b;
+  --panel2: #202326;
+  --text: #f1f1ef;
+  --muted: #9b9da0;
+  --line: #303336;
+  --yellow: #ffd400;
+  --yellow2: #ffbf00;
+  --good: #4caf50;
+  --good-bg: #142918;
+  --bad: #f44336;
+  --bad-bg: #2d1616;
+  --hint-bg: #1f241a;
+  --hint-border: #3d5228;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wrap {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px 16px calc(40px + env(safe-area-inset-bottom));
+}
+
+/* HERO SECTION */
+.hero {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: linear-gradient(135deg, #17191b, #0d0f10);
+  min-height: 240px;
+  display: flex;
+  align-items: flex-end;
+  padding: 28px 24px;
+}
+
+.hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: .35;
+  filter: grayscale(1) contrast(1.05);
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 10%, rgba(13,15,16,0.92) 90%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.eyebrow {
+  color: var(--yellow);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-size: 11px;
+}
+
+h1 {
+  font-size: clamp(28px, 5vw, 48px);
+  line-height: 1.05;
+  margin: 8px 0;
+}
+
+.hero p {
+  margin: 0;
+  max-width: 600px;
+  color: #c8c9ca;
+  font-size: clamp(14px, 2.5vw, 16px);
+}
+
+/* TOPBAR & PROGRESS */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 2px 10px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.progress {
+  height: 8px;
+  background: #24272a;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress > i {
+  display: block;
+  height: 100%;
+  background: var(--yellow);
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* CARD & QUESTION */
+.card {
+  margin-top: 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 24px;
+}
+
+.qnum {
+  color: var(--yellow);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.question {
+  font-size: clamp(20px, 3.5vw, 26px);
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 8px 0 16px;
+}
+
+/* HINT BUTTON & BOX */
+.hint-btn {
+  background: transparent;
+  border: 1px dashed #555;
+  color: var(--yellow);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 16px;
+  transition: 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hint-btn:hover {
+  border-color: var(--yellow);
+  background: rgba(255, 212, 0, 0.05);
+}
+
+.hint-box {
+  display: none;
+  background: var(--hint-bg);
+  border: 1px solid var(--hint-border);
+  color: #d2e8b8;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  margin-bottom: 18px;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.hint-box.show { display: block; }
+
+/* ANSWERS */
+.answers {
+  display: grid;
+  gap: 12px;
+}
+
+.answer {
+  border: 1px solid var(--line);
+  background: var(--panel2);
+  color: var(--text);
+  padding: 16px;
+  border-radius: 14px;
+  text-align: left;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 52px;
+  touch-action: manipulation;
+}
+
+.answer:hover:not(:disabled) {
+  border-color: #666;
+  background: #282c30;
+  transform: translateY(-1px);
+}
+
+.answer b {
+  color: var(--yellow);
+  min-width: 20px;
+  font-size: 16px;
+}
+
+.answer.correct {
+  border-color: var(--good) !important;
+  background: var(--good-bg) !important;
+  color: #fff;
+}
+
+.answer.wrong {
+  border-color: var(--bad) !important;
+  background: var(--bad-bg) !important;
+  color: #fff;
+}
+
+.answer:disabled {
+  cursor: default;
+  opacity: 0.9;
+}
+
+/* FEEDBACK & NEXT */
+.feedback {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #111416;
+  border: 1px solid var(--line);
+  display: none;
+  animation: fadeIn 0.25s ease;
+}
+
+.feedback.show { display: block; }
+
+.feedback-status {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.feedback-status.is-correct { color: var(--good); }
+.feedback-status.is-wrong { color: var(--bad); }
+
+.feedback-text {
+  font-size: 14px;
+  color: #d0d1d2;
+}
+
+.next {
+  margin-top: 18px;
+  width: 100%;
+  border: 0;
+  border-radius: 14px;
+  padding: 16px;
+  background: var(--yellow);
+  color: #111;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  display: none;
+  transition: background 0.2s;
+  touch-action: manipulation;
+}
+
+.next.show { display: block; }
+.next:hover { background: var(--yellow2); }
+
+/* RESULT SCREEN */
+.result {
+  text-align: center;
+  padding: 32px 16px;
+}
+
+.score {
+  font-size: clamp(52px, 10vw, 72px);
+  font-weight: 900;
+  color: var(--yellow);
+  margin: 10px 0;
+  line-height: 1;
+}
+
+.result p {
+  color: #ccc;
+  font-size: 16px;
+  max-width: 500px;
+  margin: 0 auto 24px;
+}
+
+.restart {
+  border: 0;
+  border-radius: 14px;
+  padding: 16px 32px;
+  background: var(--yellow);
+  color: #111;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+  touch-action: manipulation;
+}
+
+.restart:hover { background: var(--yellow2); }
+
+.foot {
+  text-align: center;
+  color: #67696c;
+  font-size: 12px;
+  margin-top: 28px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .hero { min-height: 200px; padding: 20px 16px; }
+  .card { padding: 18px 14px; border-radius: 16px; }
+  .answer { padding: 14px; font-size: 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <section class="hero">
+    <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/%D0%94%D0%B0%D1%87%D0%B0%20%D0%93%D0%BE%D0%BB%D0%BE%D0%B2%D0%BA%D0%B8%D0%BD%D0%B0-1.jpg" alt="Дача Головкина" onerror="this.style.display='none'">
+    <div class="hero-content">
+      <div class="eyebrow">Самара · модерн · история</div>
+      <h1>Дом со слонами</h1>
+      <p>Проверь, насколько хорошо ты знаешь одну из самых необычных достопримечательностей Самары.</p>
+    </div>
+  </section>
+
+  <div class="topbar">
+    <span id="counter">Вопрос 1 из 5</span>
+    <span id="points">0 / 5</span>
+  </div>
+  <div class="progress"><i id="bar"></i></div>
+
+  <main id="quiz"></main>
+
+  <div class="foot">Фото: Wikimedia Commons · Интерактивная викторина</div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "Кто поставил бетонных слонов на берегу Волги и зачем?",
+    a: [
+      "Самарский купец, художник и меценат Константин Головкин в 1909 году. Он сам спроектировал дачу и создал скульптуры, чтобы их было видно с проплывающих по Волге кораблей.",
+      "Их заказал городской голова, чтобы отпугивать диких кабанов, которые выходили из Жигулёвских гор и портили огороды на набережной."
+    ],
+    c: 0,
+    hint: "Замысел принадлежал владельцу усадьбы, который совмещал купеческое дело с изобразительным искусством.",
+    e: "Головкин был не только купцом, но и художником: необычный дом и скульптуры стали частью его уникального авторского замысла."
+  },
+  {
+    q: "Почему современники считали этот дом архитектурным безумием?",
+    a: [
+      "Из-за смелого использования бетона и асимметричного фасада в стиле венского сецессиона, который резко выделялся на фоне классических купеческих особняков.",
+      "Потому что Головкин выкрасил фасад в ярко-розовый цвет и установил на крыше вращающийся маяк, который слепил жителей соседней деревни."
+    ],
+    c: 0,
+    hint: "Обратите внимание на инновационные для того времени строительные материалы и необычный стиль фасадных линий.",
+    e: "Необычная пластика, монолитный бетон и асимметрия сделали дачу совершенно непохожей на привычную купеческую архитектуру."
+  },
+  {
+    q: "Как заставить столетних каменных гигантов снова ожить?",
+    a: [
+      "С помощью 3D-мэппинга и симфонического оркестра. В июне 2025 года световые проекции превратили бетонные фигуры в часть масштабного шоу.",
+      "Их натирают специальным маслом из семян волжской пальмы раз в год на Ивана Купалу, после чего слоны начинают шевелить ушами."
+    ],
+    c: 0,
+    hint: "Вспомните современные мультимедийные и световые технологии.",
+    e: "Здесь сработали технологии: световые проекции и музыка создали эффект нового сценического образа знаменитых слонов."
+  },
+  {
+    q: "Что скрывает взгляд слонов, направленный на левый берег?",
+    a: [
+      "Судьбу усадьбы: после революции 1917 года Головкин лишился дома, а внутри поочерёдно работали детский сад, госпиталь и конторы водоканала.",
+      "Согласно городской легенде, в полнолуние слоны сходят с постаментов, переходят на левый берег, купаются в Волге, а на рассвете возвращаются на свои места."
+    ],
+    c: 0,
+    hint: "Связано с реальными историческими событиями XX века и сменой владельцев здания.",
+    e: "История здания менялась вместе с жизнью страны: после революции у усадьбы были самые разные общественные функции."
+  },
+  {
+    q: "Спасем последний самарский модерн или оставим его разрушаться?",
+    a: [
+      "Спасаем. Началась масштабная реставрация, дача признана объектом культурного наследия федерального значения.",
+      "Оставим разрушаться. По новому генплану Самары на месте дачи Головкина решено построить 25-этажный жилой комплекс."
+    ],
+    c: 0,
+    hint: "У памятников архитектуры федерального значения есть государственная защита.",
+    e: "Комплекс имеет статус объекта культурного наследия федерального значения; территория была отреставрирована и благоустроена."
+  }
+];
+
+let currentIndex = 0;
+let score = 0;
+
+const quiz = document.getElementById("quiz");
+const counter = document.getElementById("counter");
+const points = document.getElementById("points");
+const bar = document.getElementById("bar");
+
+function render() {
+  const item = questions[currentIndex];
+  
+  counter.textContent = `Вопрос ${currentIndex + 1} из ${questions.length}`;
+  points.textContent = `${score} / ${questions.length}`;
+  bar.style.width = `${(currentIndex / questions.length) * 100}%`;
+
+  quiz.innerHTML = `
+    <section class="card">
+      <div class="qnum">ВОПРОС ${currentIndex + 1}</div>
+      <div class="question">${item.q}</div>
+      
+      <button class="hint-btn" onclick="toggleHint()">💡 Взять подсказку</button>
+      <div id="hintBox" class="hint-box">${item.hint}</div>
+
+      <div class="answers">
+        ${item.a.map((ansText, idx) => `
+          <button class="answer" onclick="makeChoice(${idx})">
+            <b>${idx === 0 ? "A" : "B"}</b>
+            <span>${ansText}</span>
+          </button>
+        `).join("")}
+      </div>
+
+      <div id="feedback" class="feedback"></div>
+      <button id="nextBtn" class="next" onclick="nextQuestion()">Следующий вопрос →</button>
+    </section>
+  `;
+}
+
+function toggleHint() {
+  const hintBox = document.getElementById("hintBox");
+  if (hintBox) {
+    hintBox.classList.toggle("show");
+  }
+}
+
+function makeChoice(selectedIndex) {
+  const item = questions[currentIndex];
+  const buttons = document.querySelectorAll(".answer");
+  const isCorrect = selectedIndex === item.c;
+
+  if (isCorrect) score++;
+
+  buttons.forEach((btn, idx) => {
+    btn.disabled = true;
+    if (idx === item.c) {
+      btn.classList.add("correct");
+    }
+    if (idx === selectedIndex && !isCorrect) {
+      btn.classList.add("wrong");
+    }
+  });
+
+  const feedback = document.getElementById("feedback");
+  feedback.innerHTML = isCorrect
+    ? `<div class="feedback-status is-correct">✓ Верно!</div>
+       <div class="feedback-text">${item.e}</div>`
+    : `<div class="feedback-status is-wrong">✕ Неверно!</div>
+       <div class="feedback-text" style="margin-bottom: 6px;">Вы выбрали неправильный вариант.</div>
+       <div class="feedback-text"><strong>Правильный ответ:</strong> ${item.a[item.c]}</div>
+       <div class="feedback-text" style="margin-top: 8px;">${item.e}</div>`;
+
+  feedback.classList.add("show");
+  document.getElementById("nextBtn").classList.add("show");
+  points.textContent = `${score} / ${questions.length}`;
+}
+
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex < questions.length) {
+    render();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  bar.style.width = "100%";
+  counter.textContent = "Викторина завершена";
+  points.textContent = `${score} / ${questions.length}`;
+
+  let title = "Есть что ещё исследовать!";
+  let desc = "Самое время ещё раз взглянуть на историю необычной дачи.";
+
+  if (score === 5) {
+    title = "Архитектурный эксперт!";
+    desc = "Отличная работа! Ты знаешь историю Дома со слонами не хуже гидов и краеведов.";
+  } else if (score >= 3) {
+    title = "Отличный результат!";
+    desc = "Хороший результат — история Самары и купеческого модерна тебе явно знакома.";
+  }
+
+  quiz.innerHTML = `
+    <section class="card result">
+      <div class="eyebrow">РЕЗУЛЬТАТ</div>
+      <h2>${title}</h2>
+      <div class="score">${score}/${questions.length}</div>
+      <p>${desc}</p>
+      <button class="restart" onclick="restart()">Пройти ещё раз</button>
+    </section>
+  `;
+}
+
+function restart() {
+  currentIndex = 0;
+  score = 0;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
